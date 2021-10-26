@@ -1,0 +1,231 @@
+openapi: 3.0.2
+
+info:
+  title: Password Hash Service
+  description: >-
+    Micro-service used to create SHA512 hashes from passwords.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local test server
+  - url: http://localhost.com
+    description: Main (production) server
+    
+paths:
+  /api/v1/hash:
+    post:
+      tags:
+        - Create Password Hashes
+      summary: Requests base-64 encoded SHA512 hash be created from a password.
+      description: "Returns a hash ID or integer used to retrieve the password's base-64 encoded SHA512 hash. The full URL to the newly created resource is returned in the Location header.  For examlpe: 'Location: http://localhost/api/v1/hash/42'."
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+              required:
+                - password
+      responses:
+        201:
+          description: The hash ID used to retrieve the password's SHA512 hash.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: The relative URL of the newly created hash ID.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 42
+        400:
+          description: Invalid input. This can happen if the password is too weak.
+        500:
+          description: Failed to processs the request. This can happen on a system error.
+    put:
+      tags:
+        - Create Password Hashes
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+    get:
+      tags:
+        - Create Password Hashes
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+    delete:
+      tags:
+        - Create Password Hashes
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+          
+  /api/v1/hash/{hashID}:
+    get:
+      tags:
+        - Retrieve Password Hashes
+      summary: Retrieves the password's SHA512 hash given by the hash ID.
+      description: Returns the base-64 encoded password's SHA512 hash.
+      parameters:
+        - name: hashID
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The hash ID that identifies the password hash.
+      responses:
+        200:
+          description: The password's SHA512 hash encoded as a base-64 string.
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: byte
+                description: The base-64 encoded SHA512 password hash.
+                example: cGFzc3dvcmQ=
+        400:
+          description: Invalid input. This can happen if the hashID is not an integer.
+        404:
+          description: Not Found. The hashID is a valid integer but it does not exist.
+        500:
+          description: Failed to retrieve the password hash. This can happen on a system error.
+        503:
+          description: The resource is not available yet. Try again after n number of seconds returned in the 'Retry-After' header.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: The number of seconds to wait before trying again.
+    put:
+      tags:
+        - Retrieve Password Hashes
+      summary: Method not allowed
+      parameters:
+        - name: hashID
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The hash ID that identifies the password hash.
+      responses:
+        405:
+          description: Method not allowed
+    post:
+      tags:
+        - Retrieve Password Hashes
+      summary: Method not allowed
+      parameters:
+        - name: hashID
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The hash ID that identifies the password hash.
+      responses:
+        405:
+          description: Method not allowed
+    delete:
+      tags:
+        - Retrieve Password Hashes
+      summary: Method not allowed
+      parameters:
+        - name: hashID
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The hash ID that identifies the password hash.
+      responses:
+        405:
+          description: Method not allowed
+          
+  /api/v1/shutdown:
+    post:
+      tags:
+        - Service Actions
+      summary: Shuts down the service.
+      description: Initiates the service shutdown process. The service will shutdown only after all the pending request are processed. Requests to any other API will be rejected with a HTTP 500 error.
+      responses:
+        204:
+          description: The service has started the shutdown process.
+        500:
+          description: Failed to initiate the shutdown process.
+    put:
+      tags:
+        - Service Actions
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+    get:
+      tags:
+        - Service Actions
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+    delete:
+      tags:
+        - Service Actions
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+          
+  /api/v1/stats:
+    get:
+      tags:
+        - Statistics
+      summary: Reports the hash statistics.
+      description: Returns a JSON object containing this service statistics.
+      responses:
+        200:
+          description: The password's hash statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+        500:
+          description: Failed to retrieve the password hash statistics.
+    put:
+      tags:
+        - Statistics
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+    post:
+      tags:
+        - Statistics
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+    delete:
+      tags:
+        - Statistics
+      summary: Method not allowed
+      responses:
+        405:
+          description: Method not allowed
+          
+components:
+  schemas:
+    Statistics:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: The total number of hash requests made.
+        average:
+          type: integer
+          description: The average number of microseconds to process the all request.

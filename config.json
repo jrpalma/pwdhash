@@ -1,0 +1,1 @@
+{"LogLevel":"WARN","LogDestination":"STDERR","LogFile":"","CheckPasswordStrength":false,"PasswordStrength":{"MinLowerCase":1,"MinUpperCase":1,"MinSpecial":1,"MinDigits":1,"MinLength":8,"MaxLength":0},"MaxTaskSeconds":5,"ServerAddress":":8080"}
